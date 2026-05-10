@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Activity Tracker</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header>
+        <div class="header-icon">🖱️</div>
+        <div>
+          <h1>Activity Tracker</h1>
+          <p class="subtitle">Thống kê hoạt động của bạn</p>
+        </div>
+      </header>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card accent-blue">
+          <span class="stat-label">Click Trái</span>
+          <span class="stat-value" id="left-clicks">0</span>
+        </div>
+        <div class="stat-card accent-pink">
+          <span class="stat-label">Click Phải</span>
+          <span class="stat-value" id="right-clicks">0</span>
+        </div>
+        <div class="stat-card accent-purple">
+          <span class="stat-label">Phím Bấm</span>
+          <span class="stat-value" id="keystrokes">0</span>
+        </div>
+        <div class="stat-card accent-green">
+          <span class="stat-label">Từ Đã Gõ</span>
+          <span class="stat-value" id="words">0</span>
+        </div>
+        <div class="stat-card accent-teal">
+          <span class="stat-label">Cuộn Lên ↑</span>
+          <span class="stat-value" id="scroll-up">0</span>
+        </div>
+        <div class="stat-card accent-orange">
+          <span class="stat-label">Cuộn Xuống ↓</span>
+          <span class="stat-value" id="scroll-down">0</span>
+        </div>
+      </div>
+
+      <!-- Scroll Distribution -->
+      <section class="section">
+        <h2 class="section-title">Phân Bố Cuộn Trang</h2>
+        <div class="click-dist-bar">
+          <div
+            class="dist-segment seg-scroll-up"
+            id="seg-scroll-up"
+            title="Cuộn lên"
+          ></div>
+          <div
+            class="dist-segment seg-scroll-down"
+            id="seg-scroll-down"
+            title="Cuộn xuống"
+          ></div>
+        </div>
+        <div class="dist-legend">
+          <span class="legend-item legend-scroll-up">
+            <span class="dot"></span>Lên ↑ <strong id="pct-scroll-up">–</strong>
+          </span>
+          <span class="legend-item legend-scroll-down">
+            <span class="dot"></span>Xuống ↓
+            <strong id="pct-scroll-down">–</strong>
+          </span>
+        </div>
+      </section>
+
+      <!-- Click Distribution -->
+      <section class="section">
+        <h2 class="section-title">Phân Bố Click Chuột</h2>
+        <div class="click-dist-bar">
+          <div
+            class="dist-segment seg-left"
+            id="seg-left"
+            title="Click trái"
+          ></div>
+          <div
+            class="dist-segment seg-middle"
+            id="seg-middle"
+            title="Click giữa"
+          ></div>
+          <div
+            class="dist-segment seg-right"
+            id="seg-right"
+            title="Click phải"
+          ></div>
+        </div>
+        <div class="dist-legend">
+          <span class="legend-item legend-left">
+            <span class="dot"></span>Trái <strong id="pct-left">–</strong>
+          </span>
+          <span class="legend-item legend-middle">
+            <span class="dot"></span>Giữa <strong id="mid-count">0</strong>
+          </span>
+          <span class="legend-item legend-right">
+            <span class="dot"></span>Phải <strong id="pct-right">–</strong>
+          </span>
+        </div>
+      </section>
+
+      <!-- Hourly Heatmap -->
+      <section class="section">
+        <h2 class="section-title">Hoạt Động Theo Giờ</h2>
+        <div id="heatmap-grid" class="heatmap-grid"></div>
+        <div class="heatmap-hours">
+          <span>0h</span><span>6h</span><span>12h</span><span>18h</span
+          ><span>23h</span>
+        </div>
+        <p class="heatmap-peak" id="heatmap-peak"></p>
+      </section>
+
+      <!-- Top Keys -->
+      <section class="section">
+        <h2 class="section-title">Top 5 Phím Bấm Nhiều Nhất</h2>
+        <div id="top-keys" class="bar-list"></div>
+      </section>
+
+      <!-- Top Words -->
+      <section class="section">
+        <h2 class="section-title">Top 5 Từ Gõ Nhiều Nhất</h2>
+        <div id="top-words" class="bar-list"></div>
+      </section>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button
+          id="export-btn"
+          class="btn btn-secondary"
+          title="Xuất dữ liệu ra file JSON"
+        >
+          📤 Xuất JSON
+        </button>
+        <button
+          id="reset-btn"
+          class="btn btn-danger"
+          title="Xóa toàn bộ dữ liệu thống kê"
+        >
+          🗑️ Xóa Dữ Liệu
+        </button>
+      </div>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>

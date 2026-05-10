@@ -1,0 +1,91 @@
+/* ── Overlay widget injected into typing sites ───────────────────────────── */
+
+#ff-overlay {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 999999;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+#ff-overlay-inner {
+  background: rgba(15, 15, 26, 0.92);
+  border: 1px solid #2a2a45;
+  border-radius: 10px;
+  padding: 10px 14px;
+  width: 160px;
+  backdrop-filter: blur(8px);
+  color: #e0e0f0;
+  font-size: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s;
+}
+
+#ff-overlay-inner.ff-ov-minimized {
+  width: 40px;
+  height: 28px;
+  overflow: hidden;
+  padding: 4px 8px;
+}
+
+.ff-ov-header {
+  font-size: 11px;
+  font-weight: 700;
+  color: #a48cf4;
+  margin-bottom: 8px;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+.ff-ov-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.ff-ov-label {
+  color: #888;
+}
+.ff-ov-val {
+  font-weight: 600;
+  color: #fff;
+}
+
+#ff-ov-toggle {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+}
+#ff-ov-toggle:hover {
+  color: #aaa;
+}
+
+/* ── Goal progress bar in overlay ──────────────────────────────────── */
+.ff-ov-goal-row {
+  margin-top: 6px;
+}
+.ff-ov-goal-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #888;
+  margin-bottom: 2px;
+}
+.ff-ov-goal-bar {
+  background: #2a2a45;
+  border-radius: 4px;
+  height: 4px;
+  overflow: hidden;
+}
+.ff-ov-goal-fill {
+  height: 100%;
+  background: #a48cf4;
+  border-radius: 4px;
+  transition: width 0.4s;
+}

@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <title>SSD &amp; RAM Price Tracker</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0f172a;
+        --card: #1e293b;
+        --border: #334155;
+        --text: #f1f5f9;
+        --muted: #94a3b8;
+        --accent: #38bdf8;
+        --up: #f87171;
+        --down: #34d399;
+      }
+
+      body {
+        width: 680px;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Segoe UI", system-ui, sans-serif;
+        font-size: 13px;
+        user-select: none;
+      }
+
+      /* ── Header ── */
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px 8px;
+        border-bottom: 1px solid var(--border);
+      }
+      .header h1 {
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        color: var(--accent);
+      }
+      #btn-update {
+        background: #1d4ed8;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 4px 11px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      #btn-update:hover {
+        background: #2563eb;
+      }
+      #btn-update:disabled {
+        background: #334155;
+        color: var(--muted);
+        cursor: default;
+      }
+
+      /* ── Tabs ── */
+      .tabs {
+        display: flex;
+        gap: 2px;
+        padding: 8px 14px 0;
+      }
+      .tab-btn {
+        background: var(--card);
+        color: var(--muted);
+        border: 1px solid var(--border);
+        border-bottom: none;
+        border-radius: 6px 6px 0 0;
+        padding: 5px 16px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition:
+          color 0.15s,
+          background 0.15s;
+      }
+      .tab-btn.active {
+        background: #1e3a5f;
+        color: var(--text);
+        border-color: #2d5a8e;
+      }
+      .tab-btn:not(.active):hover {
+        color: var(--text);
+      }
+
+      /* ── Chart area ── */
+      .chart-wrap {
+        padding: 0 14px;
+      }
+      #chart {
+        display: block;
+        border: 1px solid var(--border);
+        border-radius: 0 6px 6px 6px;
+        background: #131e33;
+      }
+
+      /* ── Tooltip ── */
+      #tooltip {
+        position: absolute;
+        pointer-events: none;
+        background: rgba(15, 23, 42, 0.92);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-size: 11px;
+        line-height: 1.7;
+        white-space: nowrap;
+        display: none;
+        z-index: 10;
+      }
+      .tt-date {
+        color: var(--muted);
+        font-size: 10px;
+        margin-bottom: 2px;
+      }
+      .tt-row {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .tt-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .tt-name {
+        color: var(--muted);
+        max-width: 220px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .tt-val {
+        margin-left: auto;
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      /* ── Legend ── */
+      #legend {
+        padding: 8px 14px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .legend-item {
+        display: grid;
+        grid-template-columns: 12px 1fr auto auto;
+        align-items: center;
+        gap: 7px;
+        padding: 3px 6px;
+        border-radius: 5px;
+        cursor: default;
+        transition: background 0.1s;
+      }
+      .legend-item:hover {
+        background: var(--card);
+      }
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .legend-name {
+        color: var(--muted);
+        font-size: 11px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .legend-price {
+        font-weight: 600;
+        font-size: 12px;
+        color: var(--text);
+        white-space: nowrap;
+      }
+      .legend-change {
+        font-size: 11px;
+        width: 56px;
+        text-align: right;
+        white-space: nowrap;
+      }
+      .price-up {
+        color: var(--up);
+      }
+      .price-down {
+        color: var(--down);
+      }
+      .price-same {
+        color: var(--muted);
+      }
+
+      /* ── Status bar ── */
+      .status-bar {
+        padding: 6px 14px 10px;
+        color: var(--muted);
+        font-size: 11px;
+        display: flex;
+        justify-content: space-between;
+      }
+      #status-msg {
+        color: var(--muted);
+      }
+      #status-msg.error {
+        color: var(--up);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>📈 SSD &amp; RAM Price Tracker</h1>
+      <button id="btn-update">↻ Cập nhật</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="ram">RAM DDR4 8GB</button>
+      <button class="tab-btn" data-tab="ssd">SSD 1TB</button>
+    </div>
+
+    <div class="chart-wrap">
+      <canvas id="chart" width="652" height="300"></canvas>
+    </div>
+
+    <div id="tooltip"></div>
+    <div id="legend"></div>
+
+    <div class="status-bar">
+      <span id="status-msg">Đang tải...</span>
+      <span id="status-update"></span>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

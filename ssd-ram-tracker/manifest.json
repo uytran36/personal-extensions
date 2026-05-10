@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "SSD & RAM Price Tracker",
+  "version": "1.0",
+  "description": "Theo dõi giá SSD 1TB và RAM DDR4 8GB từ tinhocngoisao.com, cập nhật mỗi khi mở trình duyệt.",
+  "permissions": ["storage"],
+  "host_permissions": ["https://tinhocngoisao.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "SSD & RAM Price Tracker"
+  }
+}

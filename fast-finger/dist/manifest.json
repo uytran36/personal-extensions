@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "Fast Finger - Typing Progress Tracker",
+  "version": "1.0.0",
+  "description": "Automatically tracks typing performance from Monkeytype with analytics and coaching.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup/index.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://monkeytype.com/*", "*://www.monkeytype.com/*"],
+      "js": ["content/monkeytype.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["*://monkeytype.com/*", "*://www.monkeytype.com/*"],
+      "js": ["content/overlay.js"],
+      "css": ["assets/overlay.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": ["storage", "alarms", "notifications"],
+  "options_page": "options/index.html"
+}
