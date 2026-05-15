@@ -7,6 +7,9 @@
  *   achievements → string[]
  */
 
+const STORAGE_KEYS = ["sessions", "streak", "goals", "achievements", "xp"];
+const BACKUP_VERSION = 1;
+
 // ── Sessions ─────────────────────────────────────────────────────────────────
 
 /** @returns {Promise<Object[]>} */
@@ -252,6 +255,94 @@ export async function getWeeklyMilestones() {
 export async function exportJSON() {
   const sessions = await getSessions();
   return JSON.stringify(sessions, null, 2);
+}
+
+export async function exportBackupJSON() {
+  const data = await chrome.storage.local.get(STORAGE_KEYS);
+  const backup = {
+    schema: "fast-finger-backup",
+    version: BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    data: {
+      sessions: normalizeSessions(data.sessions),
+      streak: normalizeStreak(data.streak),
+      goals: normalizeGoals(data.goals),
+      achievements: normalizeAchievements(data.achievements),
+      xp: normalizeXP(data.xp),
+    },
+  };
+
+  return JSON.stringify(backup, null, 2);
+}
+
+/**
+ * Imports either:
+ * 1) full backup object from exportBackupJSON(), or
+ * 2) legacy sessions array (exportJSON output).
+ */
+export async function importBackupJSON(rawText) {
+  let parsed;
+  try {
+    parsed = JSON.parse(rawText);
+  } catch {
+    throw new Error("Invalid JSON file.");
+  }
+
+  if (Array.isArray(parsed)) {
+    const sessions = normalizeSessions(parsed);
+    await chrome.storage.local.set({ sessions });
+    return {
+      importedKeys: ["sessions"],
+      sessionCount: sessions.length,
+    };
+  }
+
+  if (!parsed || typeof parsed !== "object") {
+    throw new Error("Unsupported backup format.");
+  }
+
+  const payload =
+    parsed.schema === "fast-finger-backup" && parsed.data
+      ? parsed.data
+      : parsed;
+
+  const hasKnownKeys = STORAGE_KEYS.some((key) =>
+    Object.prototype.hasOwnProperty.call(payload, key),
+  );
+
+  if (!hasKnownKeys) {
+    throw new Error("Backup does not contain supported data keys.");
+  }
+
+  const toSave = {};
+
+  if (Object.prototype.hasOwnProperty.call(payload, "sessions")) {
+    toSave.sessions = normalizeSessions(payload.sessions);
+  }
+  if (Object.prototype.hasOwnProperty.call(payload, "streak")) {
+    toSave.streak = normalizeStreak(payload.streak);
+  }
+  if (Object.prototype.hasOwnProperty.call(payload, "goals")) {
+    toSave.goals = normalizeGoals(payload.goals);
+  }
+  if (Object.prototype.hasOwnProperty.call(payload, "achievements")) {
+    toSave.achievements = normalizeAchievements(payload.achievements);
+  }
+  if (Object.prototype.hasOwnProperty.call(payload, "xp")) {
+    toSave.xp = normalizeXP(payload.xp);
+  }
+
+  await chrome.storage.local.set(toSave);
+
+  return {
+    importedKeys: Object.keys(toSave),
+    sessionCount:
+      typeof toSave.sessions === "undefined" ? null : toSave.sessions.length,
+  };
+}
+
+export async function clearAllData() {
+  await chrome.storage.local.remove(STORAGE_KEYS);
 }
 
 export async function exportCSV() {
@@ -563,4 +654,56 @@ function filterByRange(sessions, range) {
   };
   const cutoff = now - (ms[range] ?? Infinity);
   return sessions.filter((s) => new Date(s.createdAt).getTime() >= cutoff);
+}
+
+function normalizeSessions(value) {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .filter((s) => s && typeof s === "object")
+    .map((s) => ({
+      ...s,
+      id: typeof s.id === "string" && s.id ? s.id : crypto.randomUUID(),
+      createdAt:
+        typeof s.createdAt === "string" && s.createdAt
+          ? s.createdAt
+          : new Date().toISOString(),
+    }));
+}
+
+function normalizeStreak(value) {
+  const base = { count: 0, lastDate: null, longest: 0 };
+  if (!value || typeof value !== "object") return base;
+
+  return {
+    count: Number.isFinite(value.count) ? Math.max(0, value.count) : 0,
+    lastDate: typeof value.lastDate === "string" ? value.lastDate : null,
+    longest: Number.isFinite(value.longest) ? Math.max(0, value.longest) : 0,
+  };
+}
+
+function normalizeGoals(value) {
+  const base = { wpm: 80, accuracy: 97, tests: 10, minutes: 30 };
+  if (!value || typeof value !== "object") return base;
+
+  return {
+    wpm: Number.isFinite(value.wpm) ? Math.max(1, value.wpm) : base.wpm,
+    accuracy: Number.isFinite(value.accuracy)
+      ? Math.min(100, Math.max(1, value.accuracy))
+      : base.accuracy,
+    tests: Number.isFinite(value.tests) ? Math.max(1, value.tests) : base.tests,
+    minutes: Number.isFinite(value.minutes)
+      ? Math.max(1, value.minutes)
+      : base.minutes,
+  };
+}
+
+function normalizeAchievements(value) {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item) => typeof item === "string");
+}
+
+function normalizeXP(value) {
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, Math.round(value));
 }
