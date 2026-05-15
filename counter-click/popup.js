@@ -184,6 +184,93 @@ document.getElementById("export-btn").addEventListener("click", () => {
   });
 });
 
+// ─── Import JSON ──────────────────────────────────────────────────────────────
+document.getElementById("import-btn").addEventListener("click", () => {
+  document.getElementById("import-input").click();
+});
+
+document.getElementById("import-input").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    let imported;
+    try {
+      imported = JSON.parse(evt.target.result);
+    } catch {
+      alert("File không hợp lệ. Vui lòng chọn file JSON đúng định dạng.");
+      return;
+    }
+
+    if (
+      typeof imported !== "object" ||
+      imported === null ||
+      Array.isArray(imported)
+    ) {
+      alert("Dữ liệu không hợp lệ. File phải chứa một object JSON.");
+      return;
+    }
+
+    const numericFields = [
+      "leftClicks",
+      "rightClicks",
+      "middleClicks",
+      "keystrokes",
+      "words",
+      "scrollUp",
+      "scrollDown",
+    ];
+    const hasAnyField = numericFields.some(
+      (f) => typeof imported[f] === "number",
+    );
+    if (!hasAnyField) {
+      alert("Dữ liệu không đúng định dạng Activity Tracker.");
+      return;
+    }
+
+    if (
+      !confirm(
+        "Thay thế toàn bộ dữ liệu hiện tại bằng dữ liệu từ file đã chọn?",
+      )
+    ) {
+      e.target.value = "";
+      return;
+    }
+
+    const merged = {
+      leftClicks: imported.leftClicks ?? 0,
+      rightClicks: imported.rightClicks ?? 0,
+      middleClicks: imported.middleClicks ?? 0,
+      keystrokes: imported.keystrokes ?? 0,
+      words: imported.words ?? 0,
+      scrollUp: imported.scrollUp ?? 0,
+      scrollDown: imported.scrollDown ?? 0,
+      keyFrequency:
+        typeof imported.keyFrequency === "object" &&
+        !Array.isArray(imported.keyFrequency)
+          ? imported.keyFrequency
+          : {},
+      wordFrequency:
+        typeof imported.wordFrequency === "object" &&
+        !Array.isArray(imported.wordFrequency)
+          ? imported.wordFrequency
+          : {},
+      hourlyActivity:
+        Array.isArray(imported.hourlyActivity) &&
+        imported.hourlyActivity.length === 24
+          ? imported.hourlyActivity
+          : new Array(24).fill(0),
+    };
+
+    chrome.storage.local.set({ stats: merged }, () => {
+      renderUI(merged);
+      e.target.value = "";
+    });
+  };
+  reader.readAsText(file);
+});
+
 // ─── Reset data ───────────────────────────────────────────────────────────────
 document.getElementById("reset-btn").addEventListener("click", () => {
   if (

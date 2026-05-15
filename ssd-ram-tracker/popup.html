@@ -65,6 +65,28 @@
         cursor: default;
       }
 
+      .header-actions {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .btn-io {
+        background: #1e293b;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 4px 11px;
+        font-size: 12px;
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .btn-io:hover {
+        background: #334155;
+        color: var(--text);
+      }
+
       /* ── Tabs ── */
       .tabs {
         display: flex;
@@ -221,7 +243,28 @@
   <body>
     <div class="header">
       <h1>📈 SSD &amp; RAM Price Tracker</h1>
-      <button id="btn-update">↻ Cập nhật</button>
+      <div class="header-actions">
+        <button
+          class="btn-io"
+          id="btn-export"
+          title="Xuất dữ liệu ra file JSON"
+        >
+          ⬇ Xuất
+        </button>
+        <label
+          class="btn-io"
+          id="btn-import-label"
+          title="Nhập dữ liệu từ file JSON"
+          >⬆ Nhập
+          <input
+            type="file"
+            id="input-import"
+            accept=".json"
+            style="display: none"
+          />
+        </label>
+        <button id="btn-update">↻ Cập nhật</button>
+      </div>
     </div>
 
     <div class="tabs">

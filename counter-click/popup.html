@@ -128,6 +128,12 @@
       </section>
 
       <!-- Actions -->
+      <input
+        type="file"
+        id="import-input"
+        accept=".json"
+        style="display: none"
+      />
       <div class="actions">
         <button
           id="export-btn"
@@ -135,6 +141,13 @@
           title="Xuất dữ liệu ra file JSON"
         >
           📤 Xuất JSON
+        </button>
+        <button
+          id="import-btn"
+          class="btn btn-import"
+          title="Nhập dữ liệu từ file JSON"
+        >
+          📥 Nhập JSON
         </button>
         <button
           id="reset-btn"

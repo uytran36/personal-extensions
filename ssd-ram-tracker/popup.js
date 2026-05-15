@@ -18,6 +18,8 @@ const tooltip = document.getElementById("tooltip");
 const statusMsg = document.getElementById("status-msg");
 const statusUpd = document.getElementById("status-update");
 const btnUpdate = document.getElementById("btn-update");
+const btnExport = document.getElementById("btn-export");
+const inputImport = document.getElementById("input-import");
 
 // ─── Storage helpers ──────────────────────────────────────────────────────────
 function loadStorage() {
@@ -396,6 +398,62 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
     currentTab = btn.dataset.tab;
     renderAll();
   });
+});
+
+// ─── Export data ─────────────────────────────────────────────────────────────
+btnExport.addEventListener("click", () => {
+  const data = {
+    ram: rawStorage.ram || {},
+    ssd: rawStorage.ssd || {},
+    lastUpdate: rawStorage.lastUpdate || null,
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `ssd-ram-tracker-${new Date().toISOString().split("T")[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// ─── Import data ──────────────────────────────────────────────────────────────
+inputImport.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  inputImport.value = ""; // reset so the same file can be re-imported
+
+  const reader = new FileReader();
+  reader.onload = async (ev) => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (typeof data !== "object" || data === null || Array.isArray(data)) {
+        throw new Error("Định dạng file không hợp lệ.");
+      }
+
+      const toStore = {};
+      if (data.ram && typeof data.ram === "object") toStore.ram = data.ram;
+      if (data.ssd && typeof data.ssd === "object") toStore.ssd = data.ssd;
+      if (data.lastUpdate) toStore.lastUpdate = data.lastUpdate;
+
+      if (Object.keys(toStore).length === 0) {
+        throw new Error("File không chứa dữ liệu ram/ssd.");
+      }
+
+      await new Promise((resolve) =>
+        chrome.storage.local.set(toStore, resolve),
+      );
+      rawStorage = await loadStorage();
+      renderAll();
+      statusMsg.textContent = "Đã nhập dữ liệu thành công.";
+      statusMsg.className = "";
+    } catch (err) {
+      statusMsg.textContent = "Lỗi nhập dữ liệu: " + err.message;
+      statusMsg.className = "error";
+    }
+  };
+  reader.readAsText(file);
 });
 
 // ─── Update button ────────────────────────────────────────────────────────────

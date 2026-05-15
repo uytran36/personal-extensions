@@ -381,6 +381,12 @@ h1 {
   border-color: #2a2a46;
 }
 
+.btn-import {
+  background: #0f1e2a;
+  color: #4fc3f7;
+  border-color: #1a3a50;
+}
+
 .btn-danger {
   background: #2a0f1a;
   color: #f9a8d4;
